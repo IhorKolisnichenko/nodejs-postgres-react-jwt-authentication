@@ -4,8 +4,20 @@ const db = require("./app/models");
 
 const app = express();
 
+if (process.env.NODE_ENV !== "production") {
+  require("dotenv").config();
+}
+
+const domainsFromEnv = process.env.CORS_DOMAINS || "";
+
+const whitelist = domainsFromEnv.split(",").map((item) => item.trim());
+
 var corsOptions = {
-  origin: "http://localhost:8080",
+  origin: function (origin, callback) {
+    if (!origin || whitelist.indexOf(origin) !== -1) callback(null, true);
+    else callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
 };
 
 app.use(cors(corsOptions));
